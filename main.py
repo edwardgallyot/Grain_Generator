@@ -1,11 +1,11 @@
-import numpy as np
+import random
+import sys
+
+import soundfile as sf
 
 import GranulatEd as gEd
-import soundfile as sf
-import sys
-import random
-import matplotlib.pyplot as plt
-from Interpolate import interpolate_wave_table as get_sample_cubic
+
+import filters
 
 if __name__ == '__main__':
     ###########################################################################################################
@@ -108,37 +108,147 @@ if __name__ == '__main__':
 
     ###########################################################################################################
 
-    # Intitialising the maximum grains in an engine
-    grains = []
+    # Creating Asynchronous clouds
 
-    for i in range(300):
-        start = random.randint(0, random.randint(1, len(data)))
-        grains.append(
-            gEd.Grain("parabolic", start, 2000, 1.0, data, sample_rate))
+    # # Intitialising the maximum grains in an engine
+    # grains = []
+    #
+    # for i in range(10):
+    #     start = random.randint(0, random.randint(1, len(data)))
+    #     grains.append(
+    #         gEd.Grain("parabolic", start, 2000, 1.0, data, sample_rate))
+    #
+    # # print(grains)
+    #
+    # # print(len(grains))
+    #
+    # new_data = []
+    #
+    # for i in range(sample_rate * 2):
+    #     new_data.append(0.0)
+    #
+    # for i in range(len(new_data)):
+    #     randint = random.randint(1, 200)
+    #     if randint == 1:
+    #         for grain in grains:
+    #             if not grain.is_active():
+    #                 start = random.randint(0, random.randint(1, len(data)))
+    #                 duration = random.randint(480, 4800)
+    #                 speed = (random.random() * 0.01) + 0.5
+    #                 amp = random.random()
+    #                 grain.activate_grain("parabolic", start, duration, speed, amp)
+    #                 break
+    #
+    #     for grain in grains:
+    #         if grain.is_active():
+    #             sample = grain.get_next_sample()
+    #             new_data[i] += sample
 
-    # print(grains)
+    ###########################################################################################################
+    #
+    # # Creating Pitch Shifting and Time Stretching Effects
+    #
+    # grains = []
+    #
+    # for i in range(100):
+    #     start = random.randint(0, random.randint(1, len(data)))
+    #     grains.append(
+    #         gEd.Grain("parabolic", start, 2000, 1.0, data))
+    #
+    # new_data = []
+    #
+    # stretch_factor = 10.0
+    #
+    # for i in range(int(len(data) * stretch_factor)):
+    #     new_data.append(0.0)
+    #
+    # increment = 0
+    #
+    # grain_size = 4800
+    #
+    # number_of_grains = 4
+    #
+    # for i in range(number_of_grains):
+    #     if grain_size % number_of_grains != 0:
+    #         grain_size += 1
+    #
+    # for i in range(len(new_data)):
+    #     for grain in grains:
+    #         if increment == 0:
+    #             if not grain.is_active():
+    #                 start = i / stretch_factor
+    #                 duration = grain_size
+    #                 speed = 4.0
+    #                 amp = 1
+    #                 grain.activate_grain("parabolic", start, duration, speed, amp)
+    #                 break
+    #
+    #     increment += 1
+    #     if increment == grain_size / number_of_grains:
+    #         increment = 0
+    #
+    #     for grain in grains:
+    #         if grain.is_active():
+    #             sample = grain.get_next_sample()
+    #             new_data[i] += sample
 
-    # print(len(grains))
+    ###########################################################################################################
 
-    new_data = []
-
-    for i in range(sample_rate * 10):
-        new_data.append(0.0)
-
-    active_grains = 0
-
-    for i in range(len(new_data)):
-        randint = random.randint(1, 600)
-        if randint == 1:
-            for grain in grains:
-                if not grain.is_active():
-                    grain.activate_grain()
-                    active_grains += 1
-                    break
-
-        for grain in grains:
-            if grain.is_active():
-                sample = grain.get_next_sample()
-                new_data[i] += sample
-
-sf.write("out.wav", new_data, sample_rate)
+    # # Creating Basic Rain Fall Based on the Pressure Equation
+    #
+    # # Intitialising the maximum grains in an engine
+    # grains = []
+    #
+    # for i in range(100):
+    #     start = random.randint(0, random.randint(1, len(data)))
+    #     grains.append(
+    #         gEd.RainGrain("parabolic", start, 2000, 1.0, data))
+    #
+    # # print(grains)
+    #
+    # # print(len(grains))
+    #
+    # noise = gEd.NoiseTable()
+    #
+    # index = 0
+    #
+    # new_data = []
+    #
+    # for i in range(sample_rate * 5):
+    #     new_data.append(0.0)
+    #
+    # # noise.plot_table()
+    #
+    # for i in range(len(new_data)):
+    #     randint = noise.get_sample(index)
+    #
+    #     if randint > 1.4:
+    #         for grain in grains:
+    #             if not grain.is_active():
+    #                 start = 0
+    #                 duration = sample_rate / (randint * 60)
+    #                 speed = 1.0
+    #                 amp = 0.5 - randint
+    #                 grain.activate_grain("parabolic", start, duration, speed, amp)
+    #                 break
+    #
+    #     for grain in grains:
+    #         if grain.is_active():
+    #             sample = grain.get_next_sample()
+    #             new_data[i] += sample * 0.05
+    #     index += 1
+    #
+    # new_data = filters.butter_highpass_filter(new_data, 700, sample_rate, 1)
+    # new_data = filters.butter_highpass_filter(new_data, 700, sample_rate, 1)
+    #
+    # lowpass_noise = []
+    #
+    # for i in range(len(new_data)):
+    #     new_data[i] *= 10.0
+    #     lowpass_noise.append(noise.get_sample(i) * 0.01)
+    #
+    # lowpass_noise = filters.butter_lowpass_filter(lowpass_noise, 2000, sample_rate, 1)
+    #
+    # new_data += lowpass_noise
+    #
+    # sf.write("out.wav", new_data, sample_rate)
